@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/today_class_card.dart';
+import 'add_course_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  
   void _comingSoon(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
   @override
   Widget build(BuildContext context) {
-   
     final todayText = DateFormat('EEE, d MMM yyyy').format(DateTime.now());
 
     return Scaffold(
@@ -22,7 +21,7 @@ class DashboardScreen extends StatelessWidget {
       body: Column(
         children: [
           _buildHeader(context),
-      
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -32,7 +31,6 @@ class DashboardScreen extends StatelessWidget {
                   _buildWelcomeCard(),
                   const SizedBox(height: 16),
 
-            
                   Row(
                     children: [
                       Expanded(
@@ -42,7 +40,12 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Create a new course (subject)',
                           color: const Color(0xFF12A150),
                           background: const Color(0xFFE3F6EA),
-                          onTap: () => _comingSoon(context, 'Add Course screen comes next'),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AddCourseScreen(),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -53,7 +56,10 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Create a class for a course',
                           color: AppTheme.primary,
                           background: const Color(0xFFE3F0FF),
-                          onTap: () => _comingSoon(context, 'Add Class screen comes later'),
+                          onTap: () => _comingSoon(
+                            context,
+                            'Add Class screen comes later',
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -64,7 +70,10 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Set class timing and assign subject',
                           color: const Color(0xFFF57C00),
                           background: const Color(0xFFFFEBD6),
-                          onTap: () => _comingSoon(context, 'Add Schedule screen comes later'),
+                          onTap: () => _comingSoon(
+                            context,
+                            'Add Schedule screen comes later',
+                          ),
                         ),
                       ),
                     ],
@@ -85,11 +94,18 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today, size: 16, color: AppTheme.primary),
+                          const Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: AppTheme.primary,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             todayText,
-                            style: const TextStyle(fontSize: 12, color: AppTheme.primary),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.primary,
+                            ),
                           ),
                         ],
                       ),
@@ -101,8 +117,10 @@ class DashboardScreen extends StatelessWidget {
                     className: 'BSCS - 3A',
                     subjectName: 'Programming Fundamentals',
                     time: '08:30 AM – 09:30 AM',
-                    onMarkAttendance: () =>
-                        _comingSoon(context, 'Mark Attendance screen comes later'),
+                    onMarkAttendance: () => _comingSoon(
+                      context,
+                      'Mark Attendance screen comes later',
+                    ),
                   ),
                 ],
               ),
@@ -113,10 +131,8 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  
   Widget _buildHeader(BuildContext context) {
     return Container(
-    
       padding: EdgeInsets.fromLTRB(
         16,
         MediaQuery.of(context).padding.top + 12,
@@ -167,7 +183,10 @@ class DashboardScreen extends StatelessWidget {
                   fontSize: 12,
                 ),
               ),
-              Text('Teacher', style: TextStyle(color: Colors.white70, fontSize: 10)),
+              Text(
+                'Teacher',
+                style: TextStyle(color: Colors.white70, fontSize: 10),
+              ),
             ],
           ),
           const Icon(Icons.keyboard_arrow_down, color: Colors.white),
@@ -207,7 +226,7 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
           ),
-          
+
           Icon(
             Icons.account_balance,
             size: 64,

@@ -21,4 +21,29 @@ class AppTheme {
       ),
     ),
   );
+  static InputDecoration inputDecoration({
+    required String hint,
+    required IconData icon,
+    String? helper, // small grey text under the field
+  }) {
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: textGrey, fontSize: 14),
+      helperText: helper,
+      prefixIcon: Icon(icon, color: textGrey),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      enabledBorder: border(fieldBorder),
+      focusedBorder: border(primary, 1.5),
+      errorBorder: border(Colors.red),
+      focusedErrorBorder: border(Colors.red, 1.5),
+    );
+  }
 }
