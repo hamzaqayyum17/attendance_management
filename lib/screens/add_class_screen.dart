@@ -145,14 +145,13 @@ class _AddClassScreenState extends State<AddClassScreen> {
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ---- Subject (from the global course list) ----
+                      children: [                        
                         const FieldLabel('Subject (Course)'),
                         const SizedBox(height: 8),
                         AppDropdown<Course>(
                           hint: 'Select Subject',
                           icon: Icons.menu_book_outlined,
-                          items: courses, // <-- the global list from Step 4
+                          items: courses,
                           labelOf: (c) => c.displayName,
                           onChanged: (value) => _course = value,
                           validator: (value) =>

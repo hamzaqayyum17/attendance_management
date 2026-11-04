@@ -5,6 +5,7 @@ import '../widgets/quick_action_card.dart';
 import '../widgets/today_class_card.dart';
 import 'add_course_screen.dart';
 import 'add_class_screen.dart';
+import 'add_schedule_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -73,15 +74,17 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Set class timing and assign subject',
                           color: const Color(0xFFF57C00),
                           background: const Color(0xFFFFEBD6),
-                          onTap: () => _comingSoon(
+                          onTap: () => Navigator.push(
                             context,
-                            'Add Schedule screen comes later',
+                            MaterialPageRoute(
+                              builder: (_) => const AddScheduleScreen(),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // "Today's Classes" title + date on the right.
                   Row(
