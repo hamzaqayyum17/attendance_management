@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/today_class_card.dart';
 import 'add_course_screen.dart';
+import 'add_class_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -56,9 +57,11 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Create a class for a course',
                           color: AppTheme.primary,
                           background: const Color(0xFFE3F0FF),
-                          onTap: () => _comingSoon(
+                          onTap: () => Navigator.push(
                             context,
-                            'Add Class screen comes later',
+                            MaterialPageRoute(
+                              builder: (_) => const AddClassScreen(),
+                            ),
                           ),
                         ),
                       ),
