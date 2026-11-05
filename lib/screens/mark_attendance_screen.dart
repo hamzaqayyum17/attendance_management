@@ -1,3 +1,4 @@
+import 'package:attendance_management_system/widgets/add_student_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../data/app_data.dart';
@@ -45,18 +46,23 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
       student.status = student.status == 'P' ? 'A' : 'P';
     });
   }
+  
+  Future<void> _openAddStudent() async {
+    final added = await showDialog<bool>(
+      context: context,
+      builder: (_) => AddStudentDialog(classKey: _classKey),
+    );
 
-  void _addTestStudent() {
-    setState(() {
-      final n = _students.length + 1;
-      attendanceStudents.add(
-        AttendanceStudent(
-          classKey: _classKey,
-          registrationNumber: '2024-CS-${n.toString().padLeft(4, '0')}',
-          studentName: 'Test Student $n',
+    if (!mounted) return;
+    if (added == true) {
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('Student added'),
         ),
       );
-    });
+    }
   }
 
   @override
@@ -68,7 +74,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FD),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addTestStudent,
+        onPressed: _openAddStudent,
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
