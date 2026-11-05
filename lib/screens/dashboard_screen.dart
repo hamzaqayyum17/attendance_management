@@ -1,23 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../data/app_data.dart';
+import '../data/schedule_options.dart';
+import '../models/schedule.dart';
 import '../theme/app_theme.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/today_class_card.dart';
-import 'add_course_screen.dart';
 import 'add_class_screen.dart';
+import 'add_course_screen.dart';
 import 'add_schedule_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
   void _comingSoon(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
+  }
+
+  Future<void> _open(Widget screen) async {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+    if (!mounted) return;
+    setState(() {}); // empty setState = "rebuild and re-read the lists"
+  }
+
+  List<Schedule> _todaysSchedules(String todayName) {
+    final list = schedules.where((s) => s.day == todayName).toList();
+    list.sort(
+      (a, b) => timeSlots
+          .indexOf(a.timeSlot)
+          .compareTo(timeSlots.indexOf(b.timeSlot)),
+    );
+    return list;
   }
 
   @override
   Widget build(BuildContext context) {
     final todayText = DateFormat('EEE, d MMM yyyy').format(DateTime.now());
-
+    final todayName = DateFormat('EEEE').format(DateTime.now());
+    final todays = _todaysSchedules(todayName);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8FD),
       body: Column(
@@ -42,12 +67,7 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Create a new course (subject)',
                           color: const Color(0xFF12A150),
                           background: const Color(0xFFE3F6EA),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddCourseScreen(),
-                            ),
-                          ),
+                          onTap: () => _open(const AddCourseScreen()),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -58,12 +78,7 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Create a class for a course',
                           color: AppTheme.primary,
                           background: const Color(0xFFE3F0FF),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddClassScreen(),
-                            ),
-                          ),
+                          onTap: () => _open(const AddClassScreen()),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -74,12 +89,7 @@ class DashboardScreen extends StatelessWidget {
                           subtitle: 'Set class timing and assign subject',
                           color: const Color(0xFFF57C00),
                           background: const Color(0xFFFFEBD6),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AddScheduleScreen(),
-                            ),
-                          ),
+                          onTap: () => _open(const AddScheduleScreen()),
                         ),
                       ),
                     ],
@@ -119,15 +129,30 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  TodayClassCard(
-                    className: 'BSCS - 3A',
-                    subjectName: 'Programming Fundamentals',
-                    time: '08:30 AM – 09:30 AM',
-                    onMarkAttendance: () => _comingSoon(
-                      context,
-                      'Mark Attendance screen comes later',
-                    ),
-                  ),
+                  if (todays.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No classes scheduled for $todayName.',
+                          style: const TextStyle(color: AppTheme.textGrey),
+                        ),
+                      ),
+                    )
+                  else
+                    for (final s in todays)
+                      TodayClassCard(
+                        className:
+                            findClassForCourse(s.course)?.className ??
+                            s.course.courseCode,
+                        subjectName: s.course.courseTitle,
+                        time: s.timeSlot,
+
+                        onMarkAttendance: () => _comingSoon(
+                          context,
+                          'Mark Attendance screen comes in the next step',
+                        ),
+                      ),
                 ],
               ),
             ),
