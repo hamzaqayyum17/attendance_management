@@ -19,11 +19,20 @@ class AddScheduleScreen extends StatefulWidget {
 class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  
   Course? _course;
   String? _day;
   String? _timeSlot;
-int _formVersion = 0;
+  int _formVersion = 0;
+
+  int? _editIndex;
+
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   static const List<Color> _itemColors = [
     Color(0xFF2F80ED),
@@ -46,18 +55,17 @@ int _formVersion = 0;
     _course = null;
     _day = null;
     _timeSlot = null;
-    _formVersion++; 
+    _editIndex = null;
+    _formVersion++;
   }
 
-  void _addToList() {
-
+  void _submitForm() {
     if (!_formKey.currentState!.validate()) return;
 
     final course = _course!;
     final day = _day!;
     final slot = _timeSlot!;
 
-  
     if (findClassForCourse(course) == null) {
       _showMessage(
         'No class exists for ${course.courseTitle}. Create a class first.',
@@ -66,22 +74,100 @@ int _formVersion = 0;
       return;
     }
 
-    
-    final taken = schedules.any((s) => s.day == day && s.timeSlot == slot);
+    final editIndex = _editIndex;
+     var taken = false; 
+    for (int i = 0; i < schedules.length; i++) {
+      if (i == editIndex) continue;
+      if (schedules[i].day == day && schedules[i].timeSlot == slot) {
+        taken = true;
+        break;
+      }
+    }
     if (taken) {
       _showMessage('$day, $slot is already scheduled.', isError: true);
       return;
     }
 
-    
+    final schedule = Schedule(course: course, day: day, timeSlot: slot);
+
     setState(() {
-      schedules.add(Schedule(course: course, day: day, timeSlot: slot));
+      if (editIndex == null) {
+        schedules.add(schedule);
+      } else {
+        schedules[editIndex] = schedule;
+      }
       _resetFields();
     });
-    _showMessage('Added: ${course.courseTitle} on $day');
+
+    _showMessage(
+      editIndex == null
+          ? 'Added: ${course.courseTitle} on $day'
+          : 'Updated: ${course.courseTitle} on $day',
+    );
   }
 
- 
+  void _startEdit(int index) {
+    final item = schedules[index];
+    setState(() {
+      _course = item.course;
+      _day = item.day;
+      _timeSlot = item.timeSlot;
+      _editIndex = index;
+      _formVersion++;
+    });
+
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Future<void> _confirmDelete(int index) async {
+    final item = schedules[index];
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete schedule?'),
+        content: Text(
+          '${item.course.courseTitle}\n${item.day}, ${item.timeSlot}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() {
+      schedules.removeAt(index);
+      _resetFields(); // leave edit mode so row numbers can't go out of sync
+    });
+    _showMessage('Schedule deleted');
+  }
+
+  // SAVE SCHEDULE: confirm and go back to the Dashboard.
+  void _saveSchedule() {
+    if (schedules.isEmpty) {
+      _showMessage('Add at least one class to the list first.', isError: true);
+      return;
+    }
+    // The snackbar belongs to the app-level messenger, so it stays visible
+    // on the Dashboard after we pop this screen.
+    _showMessage('Schedule saved (${schedules.length} classes)');
+    Navigator.pop(context);
+  }
+
   Widget _formRow(String label, Widget field) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -187,7 +273,16 @@ int _formVersion = 0;
             ),
           ),
 
-          // Clear + Add to List
+          if (_editIndex != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(
+                'Editing schedule #${_editIndex! + 1}',
+                style: const TextStyle(fontSize: 12, color: Colors.orange),
+              ),
+            ),
+
+          // Clear + Add to List / Update
           Row(
             children: [
               Expanded(
@@ -206,9 +301,12 @@ int _formVersion = 0;
               const SizedBox(width: 10),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: _addToList,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add to List'),
+                  onPressed: _submitForm,
+                  icon: Icon(
+                    _editIndex == null ? Icons.add : Icons.check,
+                    size: 18,
+                  ),
+                  label: Text(_editIndex == null ? 'Add to List' : 'Update'),
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(0, 48),
                   ),
@@ -230,6 +328,7 @@ int _formVersion = 0;
           const AppHeader(title: 'Add Class Schedule'),
           Expanded(
             child: SingleChildScrollView(
+              controller: _scrollController,
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,15 +395,27 @@ int _formVersion = 0;
                           day: item.day,
                           time: item.timeSlot,
                           color: _itemColors[index % _itemColors.length],
-                          // Placeholders: wired up in Step 7.
-                          onEdit: () =>
-                              _showMessage('Edit is added in the next step'),
-                          onDelete: () =>
-                              _showMessage('Delete is added in the next step'),
+                          onEdit: () => _startEdit(index),
+                          onDelete: () => _confirmDelete(index),
                         );
                       },
                     ),
                 ],
+              ),
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: SafeArea(
+              top: false, // only protect the bottom edge (home indicator)
+              child: ElevatedButton.icon(
+                onPressed: _saveSchedule,
+                icon: const Icon(Icons.save_outlined, size: 18),
+                label: const Text(
+                  'Save Schedule',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
