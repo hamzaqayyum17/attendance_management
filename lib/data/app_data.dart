@@ -1,4 +1,5 @@
 import 'package:attendance_management_system/data/app_user.dart';
+import 'package:attendance_management_system/models/attendance_student.dart';
 import 'package:attendance_management_system/models/course.dart';
 import '../models/class_model.dart';
 import '../models/schedule.dart';
@@ -11,6 +12,7 @@ final List<AppUser> appUsers = [
 final List<Course> courses = [];
 final List<ClassModel> classes = [];
 final List<Schedule> schedules = [];
+final List<AttendanceStudent> attendanceStudents = [];
 ClassModel? findClassForCourse(Course course) {
   for (final c in classes) {
     if (c.course.courseCode == course.courseCode) return c;

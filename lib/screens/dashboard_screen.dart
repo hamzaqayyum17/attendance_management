@@ -1,3 +1,4 @@
+import 'package:attendance_management_system/screens/mark_attendance_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../data/app_data.dart';
@@ -148,10 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         subjectName: s.course.courseTitle,
                         time: s.timeSlot,
 
-                        onMarkAttendance: () => _comingSoon(
-                          context,
-                          'Mark Attendance screen comes in the next step',
-                        ),
+                        onMarkAttendance: () =>_open(MarkAttendanceScreen(schedule: s)),
                       ),
                 ],
               ),

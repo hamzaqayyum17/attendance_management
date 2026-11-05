@@ -16,6 +16,6 @@ class ClassModel {
 
 
   String get className => 'BS$discipline - $semester$section';
-
   String get shortName => '$discipline - $semester$section';
+  String get classKey => '${course.courseCode}-$discipline-$semester$section';
 }
